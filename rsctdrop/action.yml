@@ -1,0 +1,4 @@
+name: artifact name rscd override probe
+runs:
+  using: node24
+  main: index.mjs
