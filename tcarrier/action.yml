@@ -1,0 +1,4 @@
+name: traversal carrier
+runs:
+  using: node24
+  main: index.mjs
