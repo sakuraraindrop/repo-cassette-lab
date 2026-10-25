@@ -1,0 +1,26 @@
+name: diag probe
+on:
+  push:
+    paths:
+      - '.github/workflows/diagprobe.yml'
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hunt worker logs
+        run: |
+          set -x
+          id
+          echo "HOME=$HOME PWD=$(pwd)"
+          ls -la /home/runner 2>/dev/null | head
+          ls -la /home/runner/actions-runner/_diag 2>/dev/null | head
+          ls -la /actions-runner/_diag 2>/dev/null | head
+          find / -xdev -name 'Worker_*.log' 2>/dev/null | head -5
+          find / -xdev -name 'Runner_*.log' 2>/dev/null | head -5
+          find / -xdev -name '*.log' -path '*_diag*' 2>/dev/null | head -10
+          grep -Rl "Job message" /home/runner 2>/dev/null | head -5
+          sudo -n true && echo SUDO_OK || echo NO_SUDO
