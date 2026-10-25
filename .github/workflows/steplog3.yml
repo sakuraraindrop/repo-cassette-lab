@@ -1,0 +1,23 @@
+name: step log type probe
+on:
+  push:
+    paths:
+      - '.github/workflows/steplog3.yml'
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - uses: ./steplog3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: after probe step
+        run: echo after-probe
