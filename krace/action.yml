@@ -1,0 +1,4 @@
+name: delete-recreate artifact mime race
+runs:
+  using: node24
+  main: index.mjs
