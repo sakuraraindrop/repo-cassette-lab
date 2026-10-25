@@ -1,0 +1,4 @@
+name: case collision probe
+runs:
+  using: node24
+  main: index.mjs
