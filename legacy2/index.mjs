@@ -24,7 +24,6 @@ function req(url, method = 'GET', body = null, headers = {}, redirect = 'follow'
     });
     r.on('error', reject);
     r.on('timeout', () => r.destroy(new Error('timeout')));
-    r.on('response', undefined);
     if (body) r.write(body);
     r.end();
   });
