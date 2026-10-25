@@ -1,0 +1,49 @@
+name: Probe live step logs endpoint
+on:
+  push:
+    paths:
+      - '.github/workflows/steplivestep.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Carrier target
+        id: probe
+        uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const runId = context.runId;
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({owner, repo, run_id: runId});
+            const job = jobs.data.jobs.find(j => j.name === 'probe');
+            core.info(`JOB_ID=${job.id}`);
+            const headers = {Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'User-Agent': 'steplive-probe'};
+            for (let n = 0; n <= 9; n++) {
+              const url = `https://api.github.com/repos/${owner}/${repo}/actions/jobs/${job.id}/steps/${n}/logs`;
+              let res;
+              try {
+                res = await fetch(url, {headers, redirect: 'manual'});
+              } catch (e) {
+                core.info(`STEP ${n} fetch-error ${e.name}`); continue;
+              }
+              const loc = res.headers.get('location');
+              await res.body?.cancel();
+              core.info(`STEP ${n} status=${res.status} hasLoc=${Boolean(loc)}`);
+              if (!loc) continue;
+              let u;
+              try { u = new URL(loc); } catch { continue; }
+              core.info(`STEP ${n} locHost=${u.host} path=${u.pathname.slice(0,80)} keys=${[...u.searchParams.keys()].sort().join(',')} rsct=${JSON.stringify(u.searchParams.get('rsct'))} apiv=${JSON.stringify(u.searchParams.get('api-version'))}`);
+              try {
+                const dl = await fetch(loc);
+                const bytes = Buffer.from(await dl.arrayBuffer());
+                const ct = dl.headers.get('content-type') || '';
+                core.info(`STEP ${n} DL status=${dl.status} ctHex=${Buffer.from(ct,'latin1').toString('hex')} size=${bytes.length} sha=${require('node:crypto').createHash('sha256').update(bytes).digest('hex')}`);
+              } catch (e) { core.info(`STEP ${n} DL error ${e.name}`); }
+            }
+            await new Promise(r => setTimeout(r, 15000));
