@@ -1,0 +1,4 @@
+name: artifact lifecycle mime race v2
+runs:
+  using: node24
+  main: index.mjs
