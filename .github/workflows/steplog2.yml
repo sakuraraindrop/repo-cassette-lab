@@ -1,0 +1,23 @@
+name: step log carrier probe
+on:
+  push:
+    paths:
+      - '.github/workflows/steplog2.yml'
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - uses: ./steplog2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: another step for mapping
+        run: echo mapping-step
