@@ -3,7 +3,8 @@ import http from 'node:http';
 import https from 'node:https';
 import {BlobClient} from '@azure/storage-blob';
 import {internalArtifactTwirpClient} from '../node_modules/@actions/artifact/lib/internal/shared/artifact-twirp-client.js';
-import {getBackendIdsFromToken, getRuntimeToken, getResultsServiceUrl} from '../node_modules/@actions/artifact/lib/internal/shared/util.js';
+import {getBackendIdsFromToken} from '../node_modules/@actions/artifact/lib/internal/shared/util.js';
+import {getRuntimeToken, getResultsServiceUrl} from '../node_modules/@actions/artifact/lib/internal/shared/config.js';
 import {StringValue} from '../node_modules/@actions/artifact/lib/generated/index.js';
 
 const ids=getBackendIdsFromToken();
