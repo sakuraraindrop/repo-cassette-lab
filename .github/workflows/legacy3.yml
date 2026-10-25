@@ -1,0 +1,20 @@
+name: legacy api version probe
+on:
+  push:
+    paths:
+      - '.github/workflows/legacy3.yml'
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - uses: ./legacy3
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
