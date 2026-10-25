@@ -1,4 +1,5 @@
 import {createHash} from 'node:crypto';
+import http from 'node:http';
 import https from 'node:https';
 import {BlobClient} from '@azure/storage-blob';
 import {internalArtifactTwirpClient} from '../node_modules/@actions/artifact/lib/internal/shared/artifact-twirp-client.js';
@@ -15,7 +16,7 @@ const odd='\u0085application/json';
 
 function req(url,method='GET',body=null,headers={}){
   return new Promise((resolve,reject)=>{
-    const target=new URL(url);const mod=target.protocol==='https:'?https:await import('node:http');
+    const target=new URL(url);const mod=target.protocol==='https:'?https:http;
     const r=mod.request(target,{method,headers,timeout:20000},res=>{
       const chunks=[];res.on('data',c=>chunks.push(c));
       res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,rawHeaders:res.rawHeaders,body:Buffer.concat(chunks)}));
