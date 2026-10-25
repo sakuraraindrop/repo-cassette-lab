@@ -1,0 +1,54 @@
+name: Legacy artifact channel probe
+on:
+  push:
+    paths:
+      - '.github/workflows/legacyprobe.yml'
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Install legacy client
+        run: cd legacy-runner && npm install --no-audit --no-fund
+      - name: Upload legacy artifact
+        run: node legacy-runner/upload.mjs
+  inspect:
+    needs: upload
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect public download
+        uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const name = `legacyprobe-${context.runId}`;
+            const headers = {Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github.v3+json', 'User-Agent': 'legacy-probe'};
+            let artId;
+            for (let i=0;i<20 && !artId;i++){
+              const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/artifacts?name=${encodeURIComponent(name)}`, {headers});
+              const data = await res.json();
+              const a = (data.artifacts||[])[0];
+              if (a) artId = a.id;
+              else await new Promise(r=>setTimeout(r,1500));
+            }
+            core.info(`LEGACY_ARTIFACT id=${artId}`);
+            if (!artId) return;
+            const dl = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/artifacts/${artId}/zip`, {headers, redirect:'manual'});
+            const loc = dl.headers.get('location');
+            core.info(`LEGACY_REST status=${dl.status} loc=${loc ? loc.slice(0,200) : 'none'}`);
+            if (!loc) return;
+            let u; try { u = new URL(loc); } catch {}
+            if (u) core.info(`LEGACY_LOC host=${u.host} keys=${[...u.searchParams.keys()].sort().join(',')} rsct=${JSON.stringify(u.searchParams.get('rsct'))}`);
+            const fin = await fetch(loc);
+            const bytes = Buffer.from(await fin.arrayBuffer());
+            const ct = fin.headers.get('content-type')||'';
+            core.info(`LEGACY_FINAL status=${fin.status} ctHex=${Buffer.from(ct,'latin1').toString('hex')} size=${bytes.length} first=${JSON.stringify(bytes.subarray(0,40).toString('latin1'))}`);
