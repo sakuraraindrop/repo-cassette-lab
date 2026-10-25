@@ -1,0 +1,4 @@
+name: artifact name header generation probe
+runs:
+  using: node24
+  main: index.mjs
