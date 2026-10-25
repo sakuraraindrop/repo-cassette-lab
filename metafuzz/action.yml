@@ -1,0 +1,4 @@
+name: receiver metadata fuzz
+runs:
+  using: node24
+  main: index.mjs
