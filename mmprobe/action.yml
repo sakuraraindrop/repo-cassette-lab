@@ -1,0 +1,4 @@
+name: finalize mismatch probe
+runs:
+  using: node24
+  main: index.mjs
