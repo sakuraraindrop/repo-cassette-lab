@@ -1,0 +1,19 @@
+name: Repo Cassette NEL mime probe
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - uses: ./nelprobe
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
