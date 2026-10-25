@@ -57,11 +57,12 @@ if(workerLog){
       try{
         const msg=JSON.parse(text.slice(start,end));
         out.jobMessageKeys=Object.keys(msg).slice(0,30);
-        const plan=msg.Plan||{}; out.plan={scope:plan.ScopeIdentifier,planId:plan.PlanId,planType:plan.PlanType};
-        const tl=msg.Timeline||{}; out.timeline={id:tl.Id,recordCount:(tl.Records||[]).length};
-        const rawSteps=msg.Steps||[];
-        out.steps=rawSteps.map(s=>({id:s.Id,type:s.Type,display:s.DisplayName,ref:s.Reference?.Name||s.Reference?.Type}));
-        if(!out.steps.length && tl.Records){ out.timelineRecords=tl.Records.map(r=>({id:r.Id,type:r.Type,name:r.Name})); }
+        const plan=msg.plan||msg.Plan||{}; out.plan={scope:plan.scopeIdentifier||plan.ScopeIdentifier,planId:plan.planId||plan.PlanId,planType:plan.planType||plan.PlanType};
+        const tl=msg.timeline||msg.Timeline||{}; out.timeline={id:tl.id||tl.Id,recordCount:((tl.records||tl.Records)||[]).length};
+        const rawSteps=msg.steps||msg.Steps||[];
+        out.steps=rawSteps.map(s=>({id:s.id||s.Id,type:s.type||s.Type,display:s.displayName||s.DisplayName,ref:s.reference?.name||s.Reference?.Name,refType:s.reference?.type||s.Reference?.Type}));
+        const recs=(tl.records||tl.Records)||[];
+        if(recs.length){ out.timelineRecords=recs.slice(0,40).map(r=>({id:r.id||r.Id,type:r.type||r.Type,name:r.name||r.Name})); }
         steps=out.steps;
         out.msgJobId=msg.JobId; out.msgJobDisplayName=msg.JobDisplayName;
       }catch(e){out.parseErr=String(e.message).slice(0,200); out.snippet=text.slice(start,start+300);}
