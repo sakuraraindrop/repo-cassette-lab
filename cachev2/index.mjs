@@ -1,10 +1,11 @@
 import tls from 'node:tls';
+import {createHash} from 'node:crypto';
 
 const results = process.env.ACTIONS_RESULTS_URL;
 const token = process.env.ACTIONS_RUNTIME_TOKEN;
 const runId = process.env.GITHUB_RUN_ID;
 const key = `cassette-key-${runId}`;
-const version = `v${runId}`;
+const version = createHash('sha256').update(`version-${runId}`).digest('hex');
 const P = Buffer.from(JSON.stringify({
   full_name: 'x/cache-carrier', owner: {login: 'cassette', avatar_url: 'file:///proc/self/environ'},
   description: 'cachev2', stargazers_count: 0,
