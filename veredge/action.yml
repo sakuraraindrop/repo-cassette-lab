@@ -1,0 +1,4 @@
+name: version edge probe
+runs:
+  using: node24
+  main: index.mjs
