@@ -1,0 +1,9 @@
+name: sleeper2
+run-name: cassette json probe
+on:
+  workflow_dispatch:
+jobs:
+  sleeper2:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo hi
