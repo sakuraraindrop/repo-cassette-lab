@@ -79,17 +79,16 @@ try{
   candidates=(job?.steps||[]).map(s=>({number:s.number,name:s.name}));
 }catch(e){out.jobsErr=String(e.message).slice(0,200);}
 
-// choose a step with an id; try matching public step name to message display name
-const byName=(name)=>steps.find(s=>s.display===name) || steps.find(s=>name && s.display && (s.display.includes(name)||name.includes(s.display)));
+// map message steps to public step numbers positionally: public steps include "Set up job" first, then action steps in order
+const actionSteps=(out.publicJob.steps||[]).filter(s=>!/^Set up job$/.test(s.name) && !/^Post /.test(s.name) && !/^Complete job$/.test(s.name));
 const chosen=[];
-for(const c of candidates){
-  const hit=byName(c.name);
-  if(hit) chosen.push({number:c.number,name:c.name,id:hit.id});
+for(let i=0;i<steps.length && i<actionSteps.length;i++){
+  chosen.push({number:actionSteps[i].number,name:actionSteps[i].name,id:steps[i].id});
 }
 out.chosen=chosen.slice(0,8);
 // plant step log for each chosen and test the public endpoint
 out.tests=[];
-for(const c of chosen.slice(0,4)){
+for(const c of chosen.slice(0,5)){
   const rec={number:c.number,name:c.name,id:c.id};
   try{
     const g=await twirp('GetStepLogsSignedBlobURL',{workflow_run_backend_id:runBackend,workflow_job_run_backend_id:jobBackend,step_backend_id:c.id});
