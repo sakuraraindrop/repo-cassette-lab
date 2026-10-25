@@ -18,7 +18,7 @@ jobs:
       - name: Install legacy client
         run: cd legacy-runner && npm install --no-audit --no-fund
       - name: Upload legacy artifact
-        run: node legacy-runner/upload.mjs
+        run: node legacy-runner/upload.cjs
   inspect:
     needs: upload
     runs-on: ubuntu-latest
